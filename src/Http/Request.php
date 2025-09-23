@@ -4,14 +4,12 @@ namespace App\Http;
 
 class Request
 {
-    private static Request $instance;
-
     private function __construct(
-        public array $server,
-        public array $cookie,
-        public array $files,
-        public array $get,
-        public array $post,
+        public readonly array $server,
+        public readonly array $cookie,
+        public readonly array $files,
+        public readonly array $get,
+        public readonly array $post,
     ) {}
 
     private function __clone() {}

@@ -4,7 +4,7 @@ namespace App\Router;
 
 interface DataGenerator
 {
-    public function getData(): Collection;
+    public function getCollection(): Collection;
     
     public function addRoute(): Route;
 }
