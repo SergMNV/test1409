@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Request;
-use App\Router\SimpleRouter\SimpleRouter;
+use App\Router\DataGenerator\SimpleDataGenerator;
+use App\Router\Dispatcher\SimpleDispatcher;
+use App\Router\Router;
 
 require_once __DIR__ . '../../vendor/autoload.php';
 
@@ -10,7 +12,10 @@ $request = Request::setGlobals();
 //dd($request->server);
 
 $routes = require_once __DIR__ . '../../routes/routes.php';
-$router = new SimpleRouter();
+$router = new Router(
+    new SimpleDataGenerator(),
+    new SimpleDispatcher(),
+);
 
 $routes($router);
 

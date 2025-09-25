@@ -4,7 +4,7 @@ namespace App\Router;
 
 interface DataGenerator
 {
-    public function getCollection(): Collection;
-    
-    public function addRoute(): Route;
+    public function addRoute(string $method, string $path, mixed $handler): Route;
+
+    public function getData(): array;
 }
