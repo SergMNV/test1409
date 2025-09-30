@@ -15,7 +15,8 @@ class SimpleDataGenerator implements DataGenerator
         'PUT',
     ];
 
-    private array $routes = [];
+    private array $staticRoutes = [];
+    private array $variableRoutes = [];
 
     public function addRoute(string $method, string $path, mixed $handler): Route
     {
@@ -25,26 +26,24 @@ class SimpleDataGenerator implements DataGenerator
             throw new InvalidArgumentException();
         }
 
-        $path = $this->normalisePath($path);
+        if (strpbrk($path, '{}')) {
+            $this->variableRoutes[] = $route = new Route($method, $path, $handler);
 
-        $route = $this->routes[] = new Route($method, $path, $handler);
-        
+            return $route;
+        }
+
+        $route = $this->staticRoutes[] = new Route($method, $path, $handler);
+
         return $route;
     }
 
     public function getData(): array
     {
-        return $this->routes;
+        return [
+            'static' => $this->staticRoutes,
+            'variable' => $this->variableRoutes
+        ];
     }
 
-    public function normalisePath(string $path): string
-    {
-        $path = rtrim(strtolower($path), '/');
-        $path = preg_replace(
-            '#[/]{2,}#',
-            '/',
-            $path,
-        );
-        return $path;
-    }
+    private function parse(Route $route) {}
 }

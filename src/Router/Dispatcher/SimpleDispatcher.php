@@ -8,21 +8,24 @@ use InvalidArgumentException;
 
 class SimpleDispatcher implements Dispatcher
 {
-    public function dispatch(string $method, string $uri, array $data): array
+    private array $routes;
+    private array $vars;
+    
+    public function dispatch(string $requestMethod, string $requestUri, array $routes): array
     {
-        foreach ($data as $route) {
+        foreach ($routes as $route) {
             if (!$route instanceof Route) {
                 throw new InvalidArgumentException();
             }
 
             if (
-                $route->method === $method &&
-                $route->path === $path
+                $route->method === $requestMethod &&
+                $route->path === $requestUri
             ) {
-                return $route;
+                return [self::FOUND, $route, $this->vars ?? null];
             }
         }
 
-        return [];
+        return [self::NOT_FOUND, null, null];
     }
 }
