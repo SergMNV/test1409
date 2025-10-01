@@ -19,45 +19,33 @@ $router = new Router(
 
 $routes($router);
 
-dd($router->dispatch(
+$matching = $router->dispatch(
     $request->server['REQUEST_METHOD'],
     $request->server['REQUEST_URI'],
-));
-
+);
 /**
- * 
-
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\ConfigureRoutes $r) {
-        $r->addRoute('GET', '/users', 'get_all_users_handler');
-        // {id} must be a number (\d+)
-        $r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
-        // The /{title} suffix is optional
-        $r->addRoute('GET', '/articles/{id:\d+}[/{title}]', 'get_article_handler');
-    });
-
-// Fetch method and URI from somewhere
-$httpMethod = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
-
-// Strip query string (?foo=bar) and decode URI
-if (false !== $pos = strpos($uri, '?')) {
-    $uri = substr($uri, 0, $pos);
-}
-$uri = rawurldecode($uri);
-
-$routeInfo = $dispatcher->dispatch($httpMethod, $uri);
-switch ($routeInfo[0]) {
-    case FastRoute\Dispatcher::NOT_FOUND:
-        // ... 404 Not Found
-        break;
-    case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-        $allowedMethods = $routeInfo[1];
-        // ... 405 Method Not Allowed
-        break;
-    case FastRoute\Dispatcher::FOUND:
-        $handler = $routeInfo[1];
-        $vars = $routeInfo[2];
-        // ... call $handler with $vars
-        break;
-
+ * matching = [
+ *      int $status,
+ *      mixed $handler,
+ *      array $vars
+ * ]
  */
+
+switch ($matching[0]) {
+    case App\Router\Dispatcher::NOT_FOUND:
+        print  call_user_func($router->dispatchNotFound());
+        break;
+
+    case App\Router\Dispatcher::METHOD_NOT_ALLOWED:
+        print  call_user_func($router->dispatchNotAllowed());
+        break;
+
+    case \App\Router\Dispatcher::FOUND:
+        $handler = $matching[1];
+        $vars = $matching[2];
+
+        print call_user_func($handler);
+        break;
+}
+
+exit;

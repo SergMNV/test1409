@@ -6,7 +6,7 @@ use Exception;
 
 final class Router
 {
-    private Route $current;
+    private array $errorHandlers = [];
 
     public function __construct(
         private DataGenerator $dataGenerator,
@@ -26,8 +26,7 @@ final class Router
         $routes = $this->dataGenerator->getData();
         $requestUri = $this->normalisePath($requestUri);
 
-        // test
-        dd($routes);
+        dump($routes);
 
         return $this->dispatcher->dispatch($requestMethod, $requestUri, $routes);
     }
@@ -38,24 +37,45 @@ final class Router
         exit;
     }
 
-    public function current(): Route
-    {
-        $current = $this->current;
-        if (!$current) {
-            return throw new Exception('current route error');
-        }
+    // public function current(): Route
+    // {
+    //     $current = $this->dispatcher->current();
+        
+    //     if (!$current) {
+    //         return throw new Exception('current route error');
+    //     }
 
-        return $this->current;
+    //     return $current;
+    // }
+
+    public function setErrorHandler(int $code, mixed $handler): void
+    {
+        $this->errorHandlers[$code] = $handler;
+    }
+
+    public function dispatchNotFound(): callable
+    {
+        $error = $this->errorHandlers[404] ??= fn() => 'dispatch not found 404';
+        return $error;
+    }
+
+    public function dispatchNotAllowed(): callable
+    {
+        $error = $this->errorHandlers[400] ??= fn() => 'method not allowed 400';
+        return $error;
+    }
+
+    public function dispatchServerError(): callable
+    {
+        $error = $this->errorHandlers[500] ??= fn() => 'server error 500';
+        return $error;
     }
 
     private function normalisePath(string $path): string
     {
-        $path = rtrim(strtolower($path));
-        $path = preg_replace(
-            '#[/]{2,}#',
-            '/',
-            $path,
-        );
+        $path = trim(strtolower($path), '/');
+        $path = "/{$path}/";
+        $path = preg_replace('#[/]{2,}#', '/', $path,);
 
         return $path;
     }

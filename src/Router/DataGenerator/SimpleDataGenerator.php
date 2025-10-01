@@ -27,12 +27,21 @@ class SimpleDataGenerator implements DataGenerator
         }
 
         if (strpbrk($path, '{}')) {
-            $this->variableRoutes[] = $route = new Route($method, $path, $handler);
+            //$this->parse($path)['pattern']
+            $route = new Route($method, $path, $handler);
+            $parse = $this->parse($path);
+
+            $this->variableRoutes[] = [
+                // new Route($method, $path, $handler),
+                $route,
+                $parse,
+            ];
 
             return $route;
         }
 
         $route = $this->staticRoutes[] = new Route($method, $path, $handler);
+        
 
         return $route;
     }
@@ -45,5 +54,45 @@ class SimpleDataGenerator implements DataGenerator
         ];
     }
 
-    private function parse(Route $route) {}
+    private function parse(string $path): array
+    {
+        // $path = $path;
+        // dd($path);
+        $vars = [];
+
+        $pattern = preg_replace_callback(
+            '#/{([^}]+)}#',
+            function ($matches) use (&$vars) {
+                /**
+                  *  0 => "/{user}"
+                   * 1 => "user"
+                 */
+
+                if (str_contains($matches[1], '?')) {
+                    return '/([^/]+)';
+                }
+
+                array_push($vars, $matches[1]);
+                
+                return '/([^/]+)';
+            },
+            $path,
+        );
+
+        // preg_replace_callback(
+        //     '#/{([^}]+)}#',
+        //     function ($matches) {
+        //         return $matches;
+        //     },
+        //     $path,
+        // );
+
+        // dd($pattern);
+
+        return [
+            'path' => $path,
+            'pattern' => $pattern,
+            'vars' => $vars,
+        ];
+    }
 }
