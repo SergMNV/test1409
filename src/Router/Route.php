@@ -4,9 +4,7 @@ namespace App\Router;
 
 final class Route
 {
-    private ?string $name = null;
-    // private ?array $parameters = [];
-    // private array $middlewares = [];
+    private string $name;
 
     public function __construct(
         public readonly string $method,
@@ -14,30 +12,10 @@ final class Route
         public readonly  mixed $handler,
     ) {}
 
-    public function name(?string $name = null)
+    public function name(string $name): Route
     {
-        if ($name) {
-            $this->name = $name;
-            return $this;
-        }
-
-        return $this->name;
+        $this->name = $name;
+        return $this;
     }
 
-    // public function parameters(array $vars = []): array
-    // {
-    //     if (!empty($vars)) {
-    //         $this->parameters = array_merge($this->parameters, $vars);
-
-    //         return $this->parameters;
-    //     }
-
-    //     return $this->parameters;
-    // }
-
-    // public function middleware(string $alias, mixed $handler)
-    // {
-    //     $this->middlewares[$alias] = $handler;
-    //     return $this;
-    // }
 }

@@ -2,8 +2,6 @@
 
 namespace App\Router;
 
-use const Dom\NOT_FOUND_ERR;
-
 interface Dispatcher
 {
     const NOT_FOUND = 0;

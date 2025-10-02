@@ -2,8 +2,6 @@
 
 namespace App\Router;
 
-use Exception;
-
 final class Router
 {
     private array $errorHandlers = [];
@@ -33,20 +31,19 @@ final class Router
 
     public function redirect(string $path): void
     {
+        $path = $this->normalisePath($path);
         header("Location: {$path}");
         exit;
     }
 
-    // public function current(): Route
-    // {
-    //     $current = $this->dispatcher->current();
-        
-    //     if (!$current) {
-    //         return throw new Exception('current route error');
-    //     }
+    private function normalisePath(string $path): string
+    {
+        $path = trim(strtolower($path), '/');
+        $path = "/{$path}/";
+        $path = preg_replace('#[/]{2,}#', '/', $path,);
 
-    //     return $current;
-    // }
+        return $path;
+    }
 
     public function setErrorHandler(int $code, mixed $handler): void
     {
@@ -69,14 +66,5 @@ final class Router
     {
         $error = $this->errorHandlers[500] ??= fn() => 'server error 500';
         return $error;
-    }
-
-    private function normalisePath(string $path): string
-    {
-        $path = trim(strtolower($path), '/');
-        $path = "/{$path}/";
-        $path = preg_replace('#[/]{2,}#', '/', $path,);
-
-        return $path;
     }
 }

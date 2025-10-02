@@ -15,89 +15,69 @@ class SimpleDispatcher implements Dispatcher
     public function dispatch(string $requestMethod, string $requestUri, array $routes): array
     {
         /**
-         *$routes = [
-         * 'static' => $this->staticRoutes,
-         * 'variable' => $this->variableRoutes
-         * ]
+         *  $routes = ['static' => $this->staticRoutes,
+         *             'variable' => $this->variableRoutes]
          */
-
-
         foreach ($routes['static'] as $route) {
-            // проверка обьекта 
-            if (!$route instanceof Route) {
-                throw new InvalidArgumentException();
-            }
-
             if (
                 $route->method === $requestMethod &&
                 $route->path === $requestUri
             ) {
-                // $this->current = $route;
 
                 return [self::FOUND, $route->handler, $this->vars ?? null];
             }
         }
 
         foreach ($routes['variable'] as $item) {
-            // Route
+            /**
+             * $item = [
+             *      [0] => Route,
+             *      [1] => [
+             *          'pattern' => "/home/([^/]+)/",
+             *          'vars' => [
+             *              0 => "user",
+             *          ]
+             *      ]
+             */
             $route = $item[0];
-            // parse = 
-            //  * [
-            //  *  'path' => "/home/{user}/",
-            //  *  'pattern' => "/home/([^/]+)/",
-            //  *  'vars' => [
-            //  *        0 => "user"
-            //  *   ]
-            //  * ]
             $parse = $item[1];
+            /**
+             * $parameterNames =  [ 0 => 'user', ...]
+             */
+            $parameterNames = [];
+            $parameterValues = [];
 
-            // dd("{$parse['pattern']}");
+            foreach ($parse['vars'] as $name) {
+                array_push($parameterNames, $name);
+            }
 
             if (preg_match("#{$parse['pattern']}#", $requestUri, $matches)) {
                 /**
                  *  $matches = array [
-                 *     0 => "/home/admin/"
-                 *     1 => "admin"
+                 *      0 => "/home/admin/"
+                 *      1 => "admin"
                  *    ]
                  */
-                dump($matches);
 
-                $vars = [];
-                // foreach ($parse['vars'] as $key => $nameVar) {
-                //     $vars[$nameVar] = $matches[$key];
-                // }
-                foreach ($parse['vars'] as $key => $nameVar) {
-                    $vars[$nameVar] = array_shift($matches);
-                }
+                array_shift($matches);
+                $parameterValues = $matches;
 
-                // $this->current = $route;
-                // $this->current()->parameters($vars);
+                $vars = array_combine($parameterNames, $parameterValues);
 
                 return [self::FOUND, $route->handler, $vars ?? null];
-            } #
-
+            }
 
 
             /**
              * $item = [Route $route,
              * array $parse = 
-             * [
-             *  'path' => "/home/{user}/",
-             *  'pattern' => "/home/([^/]+)/",
-             *  'vars' => [
-             *        0 => "user"
-             *   ]
-             *]]
+             *      [
+             *          'pattern' => "/home/([^/]+)/",
+             *          'vars' => [0 => "user", ...]
+             *      ]
              */
         }
 
-
-
         return [self::NOT_FOUND, null, null];
     }
-
-    // public function current(): ?Route
-    // {
-    //     return $this->current;
-    // }
 }

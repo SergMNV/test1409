@@ -6,12 +6,10 @@ use App\Router\Dispatcher\SimpleDispatcher;
 use App\Router\Router;
 
 require_once __DIR__ . '../../vendor/autoload.php';
-
-$request = Request::setGlobals();
+$routes = require_once __DIR__ . '../../routes/routes.php';
 
 //dd($request->server);
 
-$routes = require_once __DIR__ . '../../routes/routes.php';
 $router = new Router(
     new SimpleDataGenerator(),
     new SimpleDispatcher(),
@@ -19,16 +17,18 @@ $router = new Router(
 
 $routes($router);
 
+$request = Request::setGlobals();
 $matching = $router->dispatch(
     $request->server['REQUEST_METHOD'],
     $request->server['REQUEST_URI'],
 );
+
 /**
- * matching = [
+ * $matching = [
  *      int $status,
  *      mixed $handler,
  *      array $vars
- * ]
+ *  ]
  */
 
 switch ($matching[0]) {
@@ -43,8 +43,11 @@ switch ($matching[0]) {
     case \App\Router\Dispatcher::FOUND:
         $handler = $matching[1];
         $vars = $matching[2];
-
+        
         print call_user_func($handler);
+
+        dump($vars);
+
         break;
 }
 

@@ -4,44 +4,42 @@ namespace App\Router\DataGenerator;
 
 use App\Router\DataGenerator;
 use App\Router\Route;
-use InvalidArgumentException;
 
 class SimpleDataGenerator implements DataGenerator
 {
-    private array $supportedMethods = [
-        'GET',
-        'POST',
-        'DELETE',
-        'PUT',
-    ];
-
+    /**
+     * статические роуты без параметров строки
+     * [0] => Route, ...
+     */
     private array $staticRoutes = [];
+    /**
+     * роуты с параметрами
+     * массив содержит массивы с 2мя ключами:
+     *    [0] => [
+     *      [0] => Route,
+     *      [1] => [path, pattern, vars]
+     *    ]
+     */
     private array $variableRoutes = [];
 
     public function addRoute(string $method, string $path, mixed $handler): Route
     {
-        $method = strtoupper($method);
-
-        if (!in_array($method, $this->supportedMethods)) {
-            throw new InvalidArgumentException();
-        }
-
+        // добавление роута с параметрами
         if (strpbrk($path, '{}')) {
             //$this->parse($path)['pattern']
             $route = new Route($method, $path, $handler);
-            $parse = $this->parse($path);
-
-            $this->variableRoutes[] = [
-                // new Route($method, $path, $handler),
-                $route,
-                $parse,
-            ];
-
+            $this->variableRoutes[] = [$route, $this->parse($path)];
+            /**
+             * $parse = [
+             *          'pattern' => "/home/([^/]+)/",
+             *          'vars' => [ 0 => 'user', ...]
+             *     ]
+             */
             return $route;
         }
 
+        // добавление статического роута
         $route = $this->staticRoutes[] = new Route($method, $path, $handler);
-        
 
         return $route;
     }
@@ -56,16 +54,14 @@ class SimpleDataGenerator implements DataGenerator
 
     private function parse(string $path): array
     {
-        // $path = $path;
-        // dd($path);
         $vars = [];
 
         $pattern = preg_replace_callback(
             '#/{([^}]+)}#',
             function ($matches) use (&$vars) {
                 /**
-                  *  0 => "/{user}"
-                   * 1 => "user"
+                 *  0 => "/{user}"
+                 * 1 => "user"
                  */
 
                 if (str_contains($matches[1], '?')) {
@@ -73,25 +69,17 @@ class SimpleDataGenerator implements DataGenerator
                 }
 
                 array_push($vars, $matches[1]);
-                
+
                 return '/([^/]+)';
             },
             $path,
         );
 
-        // preg_replace_callback(
-        //     '#/{([^}]+)}#',
-        //     function ($matches) {
-        //         return $matches;
-        //     },
-        //     $path,
-        // );
-
         // dd($pattern);
 
         return [
-            'path' => $path,
             'pattern' => $pattern,
+            // 'params' => [varName => value,...]
             'vars' => $vars,
         ];
     }
