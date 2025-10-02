@@ -24,8 +24,6 @@ final class Router
         $routes = $this->dataGenerator->getData();
         $requestUri = $this->normalisePath($requestUri);
 
-        dump($routes);
-
         return $this->dispatcher->dispatch($requestMethod, $requestUri, $routes);
     }
 

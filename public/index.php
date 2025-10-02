@@ -1,4 +1,16 @@
 <?php
+    ob_start();
+?>
+
+<a href="/">forward page</a>
+<br>
+<a href="/home/admin">home/{user}</a>
+<br>
+<a href="/product/22">product/{id?}</a>
+<br>
+<a href="/redirect">redirect</a>
+
+<?php
 
 use App\Http\Request;
 use App\Router\DataGenerator\SimpleDataGenerator;
@@ -8,8 +20,6 @@ use App\Router\Router;
 require_once __DIR__ . '../../vendor/autoload.php';
 $routes = require_once __DIR__ . '../../routes/routes.php';
 
-//dd($request->server);
-
 $router = new Router(
     new SimpleDataGenerator(),
     new SimpleDispatcher(),
@@ -18,6 +28,7 @@ $router = new Router(
 $routes($router);
 
 $request = Request::setGlobals();
+
 $matching = $router->dispatch(
     $request->server['REQUEST_METHOD'],
     $request->server['REQUEST_URI'],
@@ -25,12 +36,11 @@ $matching = $router->dispatch(
 
 /**
  * $matching = [
- *      int $status,
- *      mixed $handler,
- *      array $vars
+ *     0 => int $status,
+ *     1 => mixed $handler,
+ *     2 => array $vars,
  *  ]
  */
-
 switch ($matching[0]) {
     case App\Router\Dispatcher::NOT_FOUND:
         print  call_user_func($router->dispatchNotFound());
@@ -43,7 +53,7 @@ switch ($matching[0]) {
     case \App\Router\Dispatcher::FOUND:
         $handler = $matching[1];
         $vars = $matching[2];
-        
+
         print call_user_func($handler);
 
         dump($vars);

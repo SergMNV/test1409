@@ -4,7 +4,7 @@ namespace App\Router;
 
 final class Route
 {
-    private string $name;
+    private ?string $name = null;
 
     public function __construct(
         public readonly string $method,
@@ -12,10 +12,12 @@ final class Route
         public readonly  mixed $handler,
     ) {}
 
-    public function name(string $name): Route
+    public function name(string $name): ?string
     {
-        $this->name = $name;
-        return $this;
-    }
+        if (!empty($name)) {
+            $this->name = $name;
+        }
 
+        return $this->name;
+    }
 }

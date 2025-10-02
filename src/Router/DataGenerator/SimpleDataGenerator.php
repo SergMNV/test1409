@@ -11,16 +11,16 @@ class SimpleDataGenerator implements DataGenerator
      * статические роуты без параметров строки
      * [0] => Route, ...
      */
-    private array $staticRoutes = [];
+    private array $staticRouteCollection = [];
     /**
      * роуты с параметрами
      * массив содержит массивы с 2мя ключами:
      *    [0] => [
      *      [0] => Route,
      *      [1] => [path, pattern, vars]
-     *    ]
+     *    ], ...
      */
-    private array $variableRoutes = [];
+    private array $variableRoutesArray = [];
 
     public function addRoute(string $method, string $path, mixed $handler): Route
     {
@@ -28,7 +28,7 @@ class SimpleDataGenerator implements DataGenerator
         if (strpbrk($path, '{}')) {
             //$this->parse($path)['pattern']
             $route = new Route($method, $path, $handler);
-            $this->variableRoutes[] = [$route, $this->parse($path)];
+            $this->variableRoutesArray[] = [$route, $this->parse($path)];
             /**
              * $parse = [
              *          'pattern' => "/home/([^/]+)/",
@@ -37,9 +37,8 @@ class SimpleDataGenerator implements DataGenerator
              */
             return $route;
         }
-
         // добавление статического роута
-        $route = $this->staticRoutes[] = new Route($method, $path, $handler);
+        $route = $this->staticRouteCollection[] = new Route($method, $path, $handler);
 
         return $route;
     }
@@ -47,8 +46,8 @@ class SimpleDataGenerator implements DataGenerator
     public function getData(): array
     {
         return [
-            'static' => $this->staticRoutes,
-            'variable' => $this->variableRoutes
+            'static' => $this->staticRouteCollection,
+            'variable' => $this->variableRoutesArray
         ];
     }
 
@@ -57,29 +56,32 @@ class SimpleDataGenerator implements DataGenerator
         $vars = [];
 
         $pattern = preg_replace_callback(
-            '#/{([^}]+)}#',
+            // здесь важен символ / в конце строки
+            '#{([^}]+)}/#',
             function ($matches) use (&$vars) {
-                /**
-                 *  0 => "/{user}"
-                 * 1 => "user"
+                /** 
+                 * $matches = [
+                 *      0 => "/{user}"
+                 *      1 => "user"
+                 *  ]
                  */
-
                 if (str_contains($matches[1], '?')) {
-                    return '/([^/]+)';
+                    // если параметр является необязательным
+                    array_push($vars, rtrim($matches[1], '?'));
+                    return '([^/]*)(?:/?)';
                 }
-
+                // если параметр является обязательным
                 array_push($vars, $matches[1]);
-
-                return '/([^/]+)';
+                return '([^/]+)/';
             },
             $path,
         );
-
-        // dd($pattern);
-
+        // return [
+        //     "pattern" => "/product/([^/]*)(?:/?)"
+        //     "vars" =>  [0 => "id"]
+        //  ]
         return [
             'pattern' => $pattern,
-            // 'params' => [varName => value,...]
             'vars' => $vars,
         ];
     }

@@ -3,13 +3,9 @@
 namespace App\Router\Dispatcher;
 
 use App\Router\Dispatcher;
-use App\Router\Route;
-use InvalidArgumentException;
 
 class SimpleDispatcher implements Dispatcher
 {
-    // private array $routes;
-    // private ?Route $current = null;
     private array $vars;
 
     public function dispatch(string $requestMethod, string $requestUri, array $routes): array
@@ -18,12 +14,13 @@ class SimpleDispatcher implements Dispatcher
          *  $routes = ['static' => $this->staticRoutes,
          *             'variable' => $this->variableRoutes]
          */
+        dump($routes);
+
         foreach ($routes['static'] as $route) {
             if (
                 $route->method === $requestMethod &&
                 $route->path === $requestUri
             ) {
-
                 return [self::FOUND, $route->handler, $this->vars ?? null];
             }
         }
@@ -61,10 +58,18 @@ class SimpleDispatcher implements Dispatcher
 
                 array_shift($matches);
                 $parameterValues = $matches;
+                $parameterValues = array_merge(
+                    $parameterValues,
+                    array_fill(
+                        count($parameterNames) - count($parameterValues),
+                        count($parameterNames) - 1,
+                        null
+                    )
+                );
 
-                $vars = array_combine($parameterNames, $parameterValues);
+                $this->vars = array_combine($parameterNames, $parameterValues);
 
-                return [self::FOUND, $route->handler, $vars ?? null];
+                return [self::FOUND, $route->handler, $this->vars ?? null];
             }
 
 
