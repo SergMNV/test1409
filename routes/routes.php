@@ -12,9 +12,9 @@ return function (Router $router) {
     )->name('home');
     //$r->addRoute('GET', '/user/{id:\d+}', 'get_user_handler');
     $router->addRoute('GET', '/registration', fn() => 'registration page');
-    $router->addRoute('GET', '/product/{id?}', fn() => 'registration page');
+    $router->addRoute('GET', '/product/{id?}', fn() => 'product page');
 
     $router->addRoute('GET', '/redirect', function () use ($router) {
-        return $router->redirect('/home/redirect');
+        return $router->redirect('/');
     });
 };

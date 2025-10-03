@@ -1,4 +1,7 @@
 <?php
+    /**
+     * чтобы работала функция Router:redirect
+     */
     ob_start();
 ?>
 
@@ -9,6 +12,7 @@
 <a href="/product/22">product/{id?}</a>
 <br>
 <a href="/redirect">redirect</a>
+<br>
 
 <?php
 

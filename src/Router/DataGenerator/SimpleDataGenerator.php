@@ -11,7 +11,7 @@ class SimpleDataGenerator implements DataGenerator
      * статические роуты без параметров строки
      * [0] => Route, ...
      */
-    private array $staticRouteCollection = [];
+    private array $staticRouteArray = [];
     /**
      * роуты с параметрами
      * массив содержит массивы с 2мя ключами:
@@ -20,7 +20,7 @@ class SimpleDataGenerator implements DataGenerator
      *      [1] => [path, pattern, vars]
      *    ], ...
      */
-    private array $variableRoutesArray = [];
+    private array $variableRouteData = [];
 
     public function addRoute(string $method, string $path, mixed $handler): Route
     {
@@ -28,7 +28,7 @@ class SimpleDataGenerator implements DataGenerator
         if (strpbrk($path, '{}')) {
             //$this->parse($path)['pattern']
             $route = new Route($method, $path, $handler);
-            $this->variableRoutesArray[] = [$route, $this->parse($path)];
+            $this->variableRouteData[] = [$route, $this->parse($path)];
             /**
              * $parse = [
              *          'pattern' => "/home/([^/]+)/",
@@ -38,7 +38,7 @@ class SimpleDataGenerator implements DataGenerator
             return $route;
         }
         // добавление статического роута
-        $route = $this->staticRouteCollection[] = new Route($method, $path, $handler);
+        $route = $this->staticRouteArray[] = new Route($method, $path, $handler);
 
         return $route;
     }
@@ -46,8 +46,8 @@ class SimpleDataGenerator implements DataGenerator
     public function getData(): array
     {
         return [
-            'static' => $this->staticRouteCollection,
-            'variable' => $this->variableRoutesArray
+            'static' => $this->staticRouteArray,
+            'variable' => $this->variableRouteData
         ];
     }
 
