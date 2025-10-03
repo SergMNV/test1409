@@ -9,7 +9,7 @@
 <br>
 <a href="/home/admin">home/{user}</a>
 <br>
-<a href="/product/22">product/{id?}</a>
+<a href="/products/2">product/{page?}</a>
 <br>
 <a href="/redirect">redirect</a>
 <br>

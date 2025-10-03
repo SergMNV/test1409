@@ -2,9 +2,12 @@
 
 namespace App\Router;
 
+use Exception;
+
 final class Router
 {
     private array $errorHandlers = [];
+    private array $currentRouteParameters = [];
 
     public function __construct(
         private DataGenerator $dataGenerator,
@@ -21,10 +24,32 @@ final class Router
 
     public function dispatch(string $requestMethod, string $requestUri): array
     {
-        $routes = $this->dataGenerator->getData();
         $requestUri = $this->normalisePath($requestUri);
 
-        return $this->dispatcher->dispatch($requestMethod, $requestUri, $routes);
+        $routes = $this->dataGenerator->getData();
+
+        try {
+            $dispatchResult = $this->dispatcher->dispatch($requestMethod, $requestUri, $routes);
+            /**
+             * проверка что в dispatchResul параметры это массив а не null
+             */
+            if (is_array($dispatchResult[2])) {
+                $this->currentRouteParameters = array_merge($this->currentRouteParameters, $dispatchResult[2]);
+            }
+        } catch (Exception $e) {
+            throw new Exception('dispatch error');
+        }
+
+        return $dispatchResult;
+    }
+
+    public function parameters(array $data = []): array
+    {
+        if (!empty($data)) {
+            $this->currentRouteParameters = array_merge($this->currentRouteParameters, $data);
+        }
+
+        return $this->currentRouteParameters;
     }
 
     public function redirect(string $path): void

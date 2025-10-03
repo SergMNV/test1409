@@ -7,12 +7,6 @@ use App\Router\Route;
 
 class SimpleDispatcher implements Dispatcher
 {
-    // private array $staticRouteArray;
-    // private array $variableRouteData;
-
-    // private string $currentMethod;
-    // private string $currentUri;
-
     public function dispatch(string $requestMethod, string $requestUri, array $routes): array
     {
         /**
