@@ -20,6 +20,7 @@ class SimpleDispatcher implements Dispatcher
         foreach ($staticRouteArray as $route) {
             $matching = $this->dispatchStaticRoute($requestMethod, $requestUri, $route);
             if ($matching) {
+                //  FIX ME стоит ли тут делать еще что то
                 return $matching;
             }
         }
@@ -42,7 +43,7 @@ class SimpleDispatcher implements Dispatcher
         ) {
             return [self::FOUND, $route->handler, null];
         }
-
+        // проверка наличия маршрута
         if ($route->path === $requestUri) {
             return [self::METHOD_NOT_ALLOWED, null, null];
         }
@@ -68,11 +69,11 @@ class SimpleDispatcher implements Dispatcher
          */
         $parameterNames = [];
         $parameterValues = [];
-
+        // берем имена параметров из парсинга
         foreach ($parseData['vars'] as $name) {
             array_push($parameterNames, $name);
         }
-
+        // ищем совпадения
         if (preg_match("#{$parseData['pattern']}#", $requestUri, $matches)) {
             /**
              *  $matches = array [
@@ -80,8 +81,14 @@ class SimpleDispatcher implements Dispatcher
              *      1 => "admin"
              *    ]
              */
+            //убираю первый обьект в массиве так как он мешает
             array_shift($matches);
+            //присваиваю значение параметра
             $parameterValues = $matches;
+            // заполняем пустые значения
+            /**
+             *  FIX ME  в будущем расчет брать больше 1 параметра
+             */
             $parameterValues = array_merge(
                 $parameterValues,
                 array_fill(
@@ -92,7 +99,7 @@ class SimpleDispatcher implements Dispatcher
             );
 
             $vars = array_combine($parameterNames, $parameterValues);
-
+            // проверка метода
             if (!$route->method === $requestMethod) {
                 return [self::METHOD_NOT_ALLOWED, null, null];
             }

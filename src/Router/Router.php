@@ -6,7 +6,6 @@ use Exception;
 
 final class Router
 {
-    private array $errorHandlers = [];
     private array $currentRouteParameters = [];
 
     public function __construct(
@@ -17,15 +16,18 @@ final class Router
     public function addRoute(string $method, string $path, mixed $handler): Route
     {
         $path = $this->normalisePath($path);
-        $route = $this->dataGenerator->addRoute($method, $path, $handler);
-
-        return $route;
+        /**
+         * обьект Route создается сохраняется в DataGenerator
+         * и возвращаеться обратно для дальнейших манипуляций
+         */
+        return $this->dataGenerator->addRoute($method, $path, $handler);
     }
 
     public function dispatch(string $requestMethod, string $requestUri): array
     {
         $requestUri = $this->normalisePath($requestUri);
 
+        // получаем массив роутов для обьекта Dispatcher
         $routes = $this->dataGenerator->getData();
 
         try {
@@ -33,10 +35,14 @@ final class Router
             /**
              * проверка что в dispatchResul параметры это массив а не null
              */
+            // FIX ME (поменять нуль на пустой массив)
             if (is_array($dispatchResult[2])) {
                 $this->currentRouteParameters = array_merge($this->currentRouteParameters, $dispatchResult[2]);
             }
         } catch (Exception $e) {
+            /**
+             * FIX ME разобраться с обработкой ошибок
+             */
             throw new Exception('dispatch error');
         }
 
@@ -45,6 +51,10 @@ final class Router
 
     public function parameters(array $data = []): array
     {
+        /**
+         * устанавливаем и запрашиваем параметры
+         *  FIX ME нужно ли это?
+         */
         if (!empty($data)) {
             $this->currentRouteParameters = array_merge($this->currentRouteParameters, $data);
         }
@@ -66,28 +76,5 @@ final class Router
         $path = preg_replace('#[/]{2,}#', '/', $path,);
 
         return $path;
-    }
-
-    public function setErrorHandler(int $code, mixed $handler): void
-    {
-        $this->errorHandlers[$code] = $handler;
-    }
-
-    public function dispatchNotFound(): callable
-    {
-        $error = $this->errorHandlers[404] ??= fn() => 'dispatch not found 404';
-        return $error;
-    }
-
-    public function dispatchNotAllowed(): callable
-    {
-        $error = $this->errorHandlers[400] ??= fn() => 'method not allowed 400';
-        return $error;
-    }
-
-    public function dispatchServerError(): callable
-    {
-        $error = $this->errorHandlers[500] ??= fn() => 'server error 500';
-        return $error;
     }
 }

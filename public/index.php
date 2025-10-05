@@ -1,15 +1,15 @@
 <?php
-    /**
-     * чтобы работала функция Router:redirect
-     */
-    ob_start();
+/**
+ * чтобы работала функция Router:redirect
+ */
+ob_start();
 ?>
 
 <a href="/">forward page</a>
 <br>
 <a href="/home/admin">home/{user}</a>
 <br>
-<a href="/products/2">product/{page?}</a>
+<a href="/products/2">products/{page?}</a>
 <br>
 <a href="/redirect">redirect</a>
 <br>
@@ -37,7 +37,6 @@ $matching = $router->dispatch(
     $request->server['REQUEST_METHOD'],
     $request->server['REQUEST_URI'],
 );
-
 /**
  * $matching = [
  *     0 => int $status,
@@ -47,11 +46,11 @@ $matching = $router->dispatch(
  */
 switch ($matching[0]) {
     case App\Router\Dispatcher::NOT_FOUND:
-        print  call_user_func($router->dispatchNotFound());
+        print 'error 404';
         break;
 
     case App\Router\Dispatcher::METHOD_NOT_ALLOWED:
-        print  call_user_func($router->dispatchNotAllowed());
+        print  'error  400';
         break;
 
     case \App\Router\Dispatcher::FOUND:

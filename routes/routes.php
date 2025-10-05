@@ -18,9 +18,11 @@ return function (Router $router) {
         function () use ($router) {
             $params = $router->parameters();
             // dd($params);
-            $nextPage = $params['page'] + 1;
+            if (!empty($params['page'])) {
+                $nextPage = $params['page'] + 1;
 
-            return (int) $nextPage;
+                return (int) $nextPage;
+            }
         }
     )->name('producs');
 
